@@ -1,1 +1,625 @@
-\# 🪟 Windows Investigation — Post-Compromise Host Analysis\## 🎯 Lab ObjectiveThis lab focuses on investigating a previously compromised Windows workstation from a Blue Team and DFIR perspective.The investigation simulates a scenario in which a Windows endpoint has already been compromised and the analyst is required to reconstruct the activity that occurred on the system. The objective is to identify evidence of persistence, suspicious user activity, malicious processes, privilege escalation, credential access, command-and-control communication, and other indicators of compromise.Rather than relying on a single artifact, the investigation correlates Windows system information, user activity, scheduled tasks, process execution, network connections, and security events to establish a timeline of the compromise and determine how the attacker maintained and expanded access.\---\## 📌 Scenario OverviewA Windows workstation was suspected to have been compromised prior to the investigation.The available evidence was limited to the compromised Windows system itself, requiring the investigation to begin with basic host identification and user activity before moving into persistence mechanisms, malicious files, network activity, and attacker behavior.The investigation followed a structured DFIR workflow:1\. Identify the Windows version and system configuration.2\. Determine recent and historical user logon activity.3\. Identify accounts with administrative privileges.4\. Investigate scheduled tasks for persistence.5\. Determine which files were executed by malicious tasks.6\. Analyze locally listening network services.7\. Establish the approximate time of compromise.8\. Correlate Windows security events with attacker activity.9\. Identify credential-dumping activity and the tools involved.10\. Identify external command-and-control infrastructure.11\. Investigate web-based shell deployment.12\. Identify firewall changes made during the compromise.13\. Investigate potential DNS poisoning activity.This approach allows the host to be analyzed as an incident rather than simply answering individual forensic questions.\---\## 🛠️ Tools and Data SourcesThe investigation relied primarily on native Windows artifacts and administrative utilities.\### Windows Tools\* Remote Desktop (RDP)\* Event Viewer\* Windows Security Event Logs\* Task Scheduler\* Windows Firewall configuration\* Command Prompt\* PowerShell\* `systeminfo`\* `whoami`\* `net user`\* `net localgroup`\* `schtasks`\* `netstat`\* `ipconfig`\* `tasklist`\* `reg`\* `wevtutil`\### Investigation FocusThe following Windows artifacts were particularly relevant:\* System information\* Local user accounts\* Local administrator group membership\* Security logon events\* Special privilege assignment events\* Scheduled task configuration\* Process execution\* Network connections\* Firewall configuration\* DNS configuration\* Suspicious executable files\* Web shell activity\* Credential-access tooling\---\# 🔍 Investigation Walkthrough\## 1. Initial Host IdentificationThe investigation began by establishing the basic identity and configuration of the Windows workstation.The following command was used to collect operating-system and host information:```cmdsysteminfo```Additional identity information was collected with:```cmdhostname``````cmdwhoami```This established the operating-system version, build information, hostname, and current security context before proceeding with the forensic investigation.Understanding the Windows version was important because later artifacts, event IDs, and available security mechanisms depend on the operating-system version.\---\## 2. Investigating Recent User ActivityThe next step was to determine which accounts had interacted with the workstation.Local account information was reviewed using:```cmdnet user```Individual account details could then be inspected with:```cmdnet user <username>```This provided information such as account status and the last logon recorded for individual users.Because multiple users were associated with the workstation, account activity was correlated with Windows Security Event Logs rather than relying exclusively on the `net user` output.\---\## 3. Security Event Log InvestigationWindows Security Event Logs were used as a primary source for reconstructing authentication activity.The investigation focused on successful and privileged logon events, particularly:```text46244672```Event ID `4624` was used to identify successful logons and establish which accounts accessed the system.Event ID `4672` was particularly important because it records logons associated with special privileges. This allowed privileged activity to be correlated with the timeline of the compromise.PowerShell can be used to query Security events directly:```powershellGet-WinEvent -FilterHashtable @{\&#x20;   LogName='Security'\&#x20;   Id=4624}```Privileged logons were investigated with:```powershellGet-WinEvent -FilterHashtable @{\&#x20;   LogName='Security'\&#x20;   Id=4672}```The events were then correlated with usernames, timestamps, and logon information to determine when suspicious privileged access occurred.\---\## 4. Determining Administrative AccountsThe investigation then examined local group membership to identify accounts with administrative privileges.The local Administrators group was queried using:```cmdnet localgroup Administrators```This provided a direct view of accounts and groups that possessed local administrative privileges.The results were compared against the expected administrative account to identify additional accounts that could have provided the attacker with elevated access.This step was important because attackers frequently create or abuse privileged accounts to maintain access after the initial compromise.\---\## 5. Scheduled Task InvestigationPersistence mechanisms were then investigated, with particular attention given to Windows Scheduled Tasks.All scheduled tasks were enumerated using:```cmdschtasks /query /fo LIST /v```The verbose output was reviewed for:\* Task names\* Task status\* Author\* Run-as account\* Trigger configuration\* Scheduled execution time\* Actions\* Executed programs\* Command-line argumentsSuspicious tasks were then inspected individually:```cmdschtasks /query /tn "<task-name>" /fo LIST /v```The investigation focused on tasks that:\* Executed unfamiliar binaries\* Ran from unusual directories\* Executed scripts or command interpreters\* Ran on a recurring schedule\* Used privileged accounts\* Had names designed to resemble legitimate Windows tasksA malicious scheduled task was identified through this process, and its configured action was used to determine which executable the attacker intended to run repeatedly.\---\## 6. Identifying the Malicious FileAfter identifying the suspicious scheduled task, the configured task action was examined to determine the file being executed.The task configuration was reviewed through:```cmdschtasks /query /tn "<task-name>" /fo LIST /v```The command-line field was especially important because it revealed the exact execution path configured by the attacker.The identified file was then investigated independently rather than assuming that the task name represented the malicious component.This provided a direct relationship between:```textScheduled Task\&#x20;     ↓Configured Command\&#x20;     ↓Malicious File\&#x20;     ↓Network Listener / Attacker Activity```\---\## 7. Investigating Local Network ServicesThe identified executable was suspected of providing a locally accessible network service.Current TCP connections and listening ports were reviewed with:```cmdnetstat -ano```A more focused view of listening TCP services was obtained using:```cmdnetstat -ano | findstr LISTENING```The PID associated with a suspicious listening socket was then correlated with the running process:```cmdtasklist /FI "PID eq <PID>"```This allowed the investigation to establish which process was responsible for the suspicious local listener and determine whether it was associated with the previously identified malicious file.\---\## 8. Establishing the Compromise TimelineThe investigation then moved from individual artifacts to timeline reconstruction.Security events were reviewed around suspicious authentication and privilege-assignment activity.In particular, Event ID `4672` was used to identify when Windows first assigned special privileges to a new logon during the suspicious period.A targeted query could be performed with PowerShell:```powershellGet-WinEvent -FilterHashtable @{\&#x20;   LogName='Security'\&#x20;   Id=4672} | Select-Object TimeCreated, Id, Message```The resulting events were correlated with:\* User logons\* Process execution\* Scheduled-task activity\* Network connections\* Credential-access activityThis allowed the investigation to establish an approximate compromise window without relying on a single artifact.\---\## 9. Credential Access InvestigationThe investigation next focused on evidence that the attacker attempted to obtain Windows credentials.Process execution and command-line information were reviewed for known credential-access tooling.Running processes could be enumerated with:```cmdtasklist```More detailed process information could be retrieved with:```powershellGet-CimInstance Win32\\\_Process |Select-Object ProcessId, ParentProcessId, Name, CommandLine```The `CommandLine` and `ParentProcessId` fields were particularly useful for identifying suspicious execution chains.The investigation revealed evidence of a credential-dumping utility being used against the Windows system.The tool name was treated as an IOC and correlated with the surrounding process and network activity to distinguish legitimate administrative activity from attacker behavior.\---\## 10. Identifying External Command-and-Control InfrastructureNetwork connections originating from the compromised workstation were investigated to identify external infrastructure used by the attacker.Active connections were reviewed using:```cmdnetstat -ano```The output was correlated with process IDs:```cmdtasklist /FI "PID eq <PID>"```This allowed suspicious external connections to be associated with the processes responsible for generating them.The investigation focused on connections that:\* Were initiated by suspicious processes\* Used unusual external destinations\* Corresponded with the execution of previously identified malicious files\* Remained active during the compromise\* Could not be explained by normal Windows or business applicationsThe suspicious external endpoint was subsequently treated as a command-and-control indicator.\---\## 11. Investigating Web-Based Shell ActivityThe investigation also identified evidence of a shell being uploaded through a web-facing service.Web-accessible directories and suspicious file activity were examined to determine whether the attacker had deployed a server-side shell.The investigation focused on the file extension associated with the uploaded shell and its relationship to the compromised web service.This activity demonstrated how an attacker could use an externally accessible web application to establish an additional execution mechanism after gaining access to the Windows host.The web shell was treated as a separate persistence and remote-access artifact and correlated with the external infrastructure identified earlier.\---\## 12. Investigating Windows Firewall ChangesThe attacker was also suspected of modifying the local firewall configuration to expose an additional port.The firewall configuration was reviewed using:```cmdnetsh advfirewall firewall show rule name=all```Rules could be filtered for inbound access using:```cmdnetsh advfirewall firewall show rule name=all | findstr /I "Inbound"```Additional inspection focused on rules that:\* Allowed inbound connections\* Exposed unusual ports\* Were created during the compromise window\* Referenced suspicious programs\* Did not correspond to normal Windows servicesFirewall changes were correlated with the malicious process and local listener identified earlier.This provided evidence that the attacker modified the host's network exposure as part of the compromise.\---\## 13. DNS Configuration and Poisoning InvestigationThe final stage investigated potential DNS manipulation.The current DNS configuration was reviewed with:```cmdipconfig /all```The investigation examined:\* Configured DNS servers\* Network adapter configuration\* Hosts-file modifications\* Suspicious DNS-related entriesThe Windows hosts file was inspected using:```cmdtype C:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts```Suspicious entries were investigated for signs that legitimate domains had been redirected to attacker-controlled infrastructure.This type of manipulation can allow an attacker to redirect a victim away from legitimate services without modifying the application itself.The investigation therefore correlated DNS-related artifacts with the previously identified malicious infrastructure rather than treating DNS configuration as an isolated artifact.\---\# 🧩 Investigation MethodologyThe investigation followed an evidence-correlation approach rather than treating each question as an independent task.The primary investigation chain was:```textHost Identification\&#x20;       ↓User Activity\&#x20;       ↓Security Logons\&#x20;       ↓Privileged Logon\&#x20;       ↓Administrative Accounts\&#x20;       ↓Scheduled Task\&#x20;       ↓Malicious Executable\&#x20;       ↓Local Network Listener\&#x20;       ↓External C2 Communication\&#x20;       ↓Credential Access\&#x20;       ↓Firewall Modification\&#x20;       ↓Web Shell Activity\&#x20;       ↓DNS Manipulation```Each artifact was used to pivot into the next stage of the investigation.For example, identifying a suspicious scheduled task provided the execution path of a malicious file. That file could then be correlated with listening network sockets using `netstat`, while the associated PID could be traced back to the process responsible for the activity.Similarly, privileged logon events were correlated with the compromise timeline to determine when elevated access first appeared.\---\# 🔎 Key Queries and Commands\### System Identification```cmdsysteminfohostnamewhoami```\### User Enumeration```cmdnet usernet user <username>```\### Administrative Group Enumeration```cmdnet localgroup Administrators```\### Scheduled Task Enumeration```cmdschtasks /query /fo LIST /v``````cmdschtasks /query /tn "<task-name>" /fo LIST /v```\### Process Enumeration```cmdtasklist``````powershellGet-CimInstance Win32\\\_Process |Select-Object ProcessId, ParentProcessId, Name, CommandLine```\### Network Investigation```cmdnetstat -ano``````cmdnetstat -ano | findstr LISTENING``````cmdtasklist /FI "PID eq <PID>"```\### Security Event Investigation```powershellGet-WinEvent -FilterHashtable @{\&#x20;   LogName='Security'\&#x20;   Id=4624}``````powershellGet-WinEvent -FilterHashtable @{\&#x20;   LogName='Security'\&#x20;   Id=4672} | Select-Object TimeCreated, Id, Message```\### Firewall Investigation```cmdnetsh advfirewall firewall show rule name=all``````cmdnetsh advfirewall firewall show rule name=all | findstr /I "Inbound"```\### DNS Investigation```cmdipconfig /all``````cmdtype C:\\\\Windows\\\\System32\\\\drivers\\\\etc\\\\hosts```\---\# ✅ Summary of FindingsThe investigation demonstrated how a previously compromised Windows workstation can be investigated using native Windows artifacts and system utilities.The analysis established evidence across multiple stages of the intrusion, including:\* Identification of the affected Windows system\* Reconstruction of user logon activity\* Identification of additional administrative accounts\* Discovery of a malicious scheduled task used for persistence\* Identification of the executable launched by the scheduled task\* Correlation of the malicious executable with a local listening service\* Reconstruction of the compromise timeline using Windows Security events\* Identification of credential-access activity\* Identification of external command-and-control infrastructure\* Discovery of a web-based shell used by the attacker\* Identification of firewall modifications used to expose an additional service\* Investigation of DNS-related manipulation and potential poisoningThe key lesson from the investigation is that a compromised Windows host rarely contains only one obvious indicator. Persistence, process execution, authentication, network connections, firewall changes, and DNS artifacts can be correlated to reconstruct attacker activity even when the original compromise is no longer actively occurring.\---\# 📚 Skills Demonstrated\* Windows host-based incident investigation\* DFIR artifact identification and correlation\* Windows Security Event Log analysis\* Authentication and privileged-logon investigation\* Local account and administrator-group enumeration\* Scheduled-task persistence detection\* Process and command-line investigation\* PID and process-to-network correlation\* Local network listener investigation\* Command-and-control identification\* Credential-access investigation\* Web-shell identification\* Windows Firewall rule analysis\* DNS configuration and poisoning investigation\* Timeline reconstruction from multiple Windows artifacts\* Native Windows command-line and PowerShell investigation\* Evidence-based incident reconstruction
+
+# Windows Investigation — Post-Compromise Host Analysis
+
+## Lab Objective
+
+This lab focuses on investigating a previously compromised Windows workstation from a Blue Team and DFIR perspective.
+
+The investigation simulates a scenario in which a Windows endpoint has already been compromised and the analyst is required to reconstruct the activity that occurred on the system. The objective is to identify evidence of persistence, suspicious user activity, malicious processes, privilege escalation, credential access, command-and-control communication, and other indicators of compromise.
+
+Rather than relying on a single artifact, the investigation correlates Windows system information, user activity, scheduled tasks, process execution, network connections, and security events to establish a timeline of the compromise and determine how the attacker maintained and expanded access.
+
+---
+
+## Scenario Overview
+
+A Windows workstation was suspected to have been compromised prior to the investigation.
+
+The available evidence was limited to the compromised Windows system itself, requiring the investigation to begin with basic host identification and user activity before moving into persistence mechanisms, malicious files, network activity, and attacker behavior.
+
+The investigation followed a structured DFIR workflow:
+
+1. Identify the Windows version and system configuration.
+2. Determine recent and historical user logon activity.
+3. Identify accounts with administrative privileges.
+4. Investigate scheduled tasks for persistence.
+5. Determine which files were executed by malicious tasks.
+6. Analyze locally listening network services.
+7. Establish the approximate time of compromise.
+8. Correlate Windows security events with attacker activity.
+9. Identify credential-dumping activity and the tools involved.
+10. Identify external command-and-control infrastructure.
+11. Investigate web-based shell deployment.
+12. Identify firewall changes made during the compromise.
+13. Investigate potential DNS poisoning activity.
+
+This approach allows the host to be analyzed as an incident rather than simply answering individual forensic questions.
+
+---
+
+## Tools and Data Sources
+
+The investigation relied primarily on native Windows artifacts and administrative utilities.
+
+### Windows Tools
+
+- Remote Desktop (RDP)
+- Event Viewer
+- Windows Security Event Logs
+- Task Scheduler
+- Windows Firewall configuration
+- Command Prompt
+- PowerShell
+- `systeminfo`
+- `whoami`
+- `net user`
+- `net localgroup`
+- `schtasks`
+- `netstat`
+- `ipconfig`
+- `tasklist`
+- `reg`
+- `wevtutil`
+
+### Investigation Focus
+
+The following Windows artifacts were particularly relevant:
+
+- System information
+- Local user accounts
+- Local administrator group membership
+- Security logon events
+- Special privilege assignment events
+- Scheduled task configuration
+- Process execution
+- Network connections
+- Firewall configuration
+- DNS configuration
+- Suspicious executable files
+- Web shell activity
+- Credential-access tooling
+
+---
+
+## Investigation Walkthrough
+
+### 1. Initial Host Identification
+
+The investigation began by establishing the basic identity and configuration of the Windows workstation.
+
+The following command was used to collect operating-system and host information:
+
+```cmd
+systeminfo
+```
+
+Additional identity information was collected with:
+
+```cmd
+hostname
+```
+
+```cmd
+whoami
+```
+
+This established the operating-system version, build information, hostname, and current security context before proceeding with the forensic investigation.
+
+Understanding the Windows version was important because later artifacts, event IDs, and available security mechanisms depend on the operating-system version.
+
+---
+
+### 2. Investigating Recent User Activity
+
+The next step was to determine which accounts had interacted with the workstation.
+
+Local account information was reviewed using:
+
+```cmd
+net user
+```
+
+Individual account details could then be inspected with:
+
+```cmd
+net user <username>
+```
+
+This provided information such as account status and the last logon recorded for individual users.
+
+Because multiple users were associated with the workstation, account activity was correlated with Windows Security Event Logs rather than relying exclusively on the `net user` output.
+
+---
+
+### 3. Security Event Log Investigation
+
+Windows Security Event Logs were used as a primary source for reconstructing authentication activity.
+
+The investigation focused on successful and privileged logon events, particularly:
+
+```
+4624
+4672
+```
+
+Event ID `4624` was used to identify successful logons and establish which accounts accessed the system.
+
+Event ID `4672` was particularly important because it records logons associated with special privileges. This allowed privileged activity to be correlated with the timeline of the compromise.
+
+PowerShell can be used to query Security events directly:
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    Id=4624
+}
+```
+
+Privileged logons were investigated with:
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    Id=4672
+}
+```
+
+The events were then correlated with usernames, timestamps, and logon information to determine when suspicious privileged access occurred.
+
+---
+
+### 4. Determining Administrative Accounts
+
+The investigation then examined local group membership to identify accounts with administrative privileges.
+
+The local Administrators group was queried using:
+
+```cmd
+net localgroup Administrators
+```
+
+This provided a direct view of accounts and groups that possessed local administrative privileges.
+
+The results were compared against the expected administrative account to identify additional accounts that could have provided the attacker with elevated access.
+
+This step was important because attackers frequently create or abuse privileged accounts to maintain access after the initial compromise.
+
+---
+
+### 5. Scheduled Task Investigation
+
+Persistence mechanisms were then investigated, with particular attention given to Windows Scheduled Tasks.
+
+All scheduled tasks were enumerated using:
+
+```cmd
+schtasks /query /fo LIST /v
+```
+
+The verbose output was reviewed for:
+
+- Task names
+- Task status
+- Author
+- Run-as account
+- Trigger configuration
+- Scheduled execution time
+- Actions
+- Executed programs
+- Command-line arguments
+
+Suspicious tasks were then inspected individually:
+
+```cmd
+schtasks /query /tn "<task-name>" /fo LIST /v
+```
+
+The investigation focused on tasks that:
+
+- Executed unfamiliar binaries
+- Ran from unusual directories
+- Executed scripts or command interpreters
+- Ran on a recurring schedule
+- Used privileged accounts
+- Had names designed to resemble legitimate Windows tasks
+
+A malicious scheduled task was identified through this process, and its configured action was used to determine which executable the attacker intended to run repeatedly.
+
+---
+
+### 6. Identifying the Malicious File
+
+After identifying the suspicious scheduled task, the configured task action was examined to determine the file being executed.
+
+The task configuration was reviewed through:
+
+```cmd
+schtasks /query /tn "<task-name>" /fo LIST /v
+```
+
+The command-line field was especially important because it revealed the exact execution path configured by the attacker.
+
+The identified file was then investigated independently rather than assuming that the task name represented the malicious component.
+
+This provided a direct relationship between:
+
+```
+Scheduled Task
+      ↓
+Configured Command
+      ↓
+Malicious File
+      ↓
+Network Listener / Attacker Activity
+```
+
+---
+
+### 7. Investigating Local Network Services
+
+The identified executable was suspected of providing a locally accessible network service.
+
+Current TCP connections and listening ports were reviewed with:
+
+```cmd
+netstat -ano
+```
+
+A more focused view of listening TCP services was obtained using:
+
+```cmd
+netstat -ano | findstr LISTENING
+```
+
+The PID associated with a suspicious listening socket was then correlated with the running process:
+
+```cmd
+tasklist /FI "PID eq <PID>"
+```
+
+This allowed the investigation to establish which process was responsible for the suspicious local listener and determine whether it was associated with the previously identified malicious file.
+
+---
+
+### 8. Establishing the Compromise Timeline
+
+The investigation then moved from individual artifacts to timeline reconstruction.
+
+Security events were reviewed around suspicious authentication and privilege-assignment activity.
+
+In particular, Event ID `4672` was used to identify when Windows first assigned special privileges to a new logon during the suspicious period.
+
+A targeted query could be performed with PowerShell:
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    Id=4672
+} | Select-Object TimeCreated, Id, Message
+```
+
+The resulting events were correlated with:
+
+- User logons
+- Process execution
+- Scheduled-task activity
+- Network connections
+- Credential-access activity
+
+This allowed the investigation to establish an approximate compromise window without relying on a single artifact.
+
+---
+
+### 9. Credential Access Investigation
+
+The investigation next focused on evidence that the attacker attempted to obtain Windows credentials.
+
+Process execution and command-line information were reviewed for known credential-access tooling.
+
+Running processes could be enumerated with:
+
+```cmd
+tasklist
+```
+
+More detailed process information could be retrieved with:
+
+```powershell
+Get-CimInstance Win32_Process |
+Select-Object ProcessId, ParentProcessId, Name, CommandLine
+```
+
+The `CommandLine` and `ParentProcessId` fields were particularly useful for identifying suspicious execution chains.
+
+The investigation revealed evidence of a credential-dumping utility being used against the Windows system.
+
+The tool name was treated as an IOC and correlated with the surrounding process and network activity to distinguish legitimate administrative activity from attacker behavior.
+
+---
+
+### 10. Identifying External Command-and-Control Infrastructure
+
+Network connections originating from the compromised workstation were investigated to identify external infrastructure used by the attacker.
+
+Active connections were reviewed using:
+
+```cmd
+netstat -ano
+```
+
+The output was correlated with process IDs:
+
+```cmd
+tasklist /FI "PID eq <PID>"
+```
+
+This allowed suspicious external connections to be associated with the processes responsible for generating them.
+
+The investigation focused on connections that:
+
+- Were initiated by suspicious processes
+- Used unusual external destinations
+- Corresponded with the execution of previously identified malicious files
+- Remained active during the compromise
+- Could not be explained by normal Windows or business applications
+
+The suspicious external endpoint was subsequently treated as a command-and-control indicator.
+
+---
+
+### 11. Investigating Web-Based Shell Activity
+
+The investigation also identified evidence of a shell being uploaded through a web-facing service.
+
+Web-accessible directories and suspicious file activity were examined to determine whether the attacker had deployed a server-side shell.
+
+The investigation focused on the file extension associated with the uploaded shell and its relationship to the compromised web service.
+
+This activity demonstrated how an attacker could use an externally accessible web application to establish an additional execution mechanism after gaining access to the Windows host.
+
+The web shell was treated as a separate persistence and remote-access artifact and correlated with the external infrastructure identified earlier.
+
+---
+
+### 12. Investigating Windows Firewall Changes
+
+The attacker was also suspected of modifying the local firewall configuration to expose an additional port.
+
+The firewall configuration was reviewed using:
+
+```cmd
+netsh advfirewall firewall show rule name=all
+```
+
+Rules could be filtered for inbound access using:
+
+```cmd
+netsh advfirewall firewall show rule name=all | findstr /I "Inbound"
+```
+
+Additional inspection focused on rules that:
+
+- Allowed inbound connections
+- Exposed unusual ports
+- Were created during the compromise window
+- Referenced suspicious programs
+- Did not correspond to normal Windows services
+
+Firewall changes were correlated with the malicious process and local listener identified earlier.
+
+This provided evidence that the attacker modified the host's network exposure as part of the compromise.
+
+---
+
+### 13. DNS Configuration and Poisoning Investigation
+
+The final stage investigated potential DNS manipulation.
+
+The current DNS configuration was reviewed with:
+
+```cmd
+ipconfig /all
+```
+
+The investigation examined:
+
+- Configured DNS servers
+- Network adapter configuration
+- Hosts-file modifications
+- Suspicious DNS-related entries
+
+The Windows hosts file was inspected using:
+
+```cmd
+type C:\Windows\System32\drivers\etc\hosts
+```
+
+Suspicious entries were investigated for signs that legitimate domains had been redirected to attacker-controlled infrastructure.
+
+This type of manipulation can allow an attacker to redirect a victim away from legitimate services without modifying the application itself.
+
+The investigation therefore correlated DNS-related artifacts with the previously identified malicious infrastructure rather than treating DNS configuration as an isolated artifact.
+
+---
+
+## Investigation Methodology
+
+The investigation followed an evidence-correlation approach rather than treating each question as an independent task.
+
+The primary investigation chain was:
+
+```
+Host Identification
+        ↓
+User Activity
+        ↓
+Security Logons
+        ↓
+Privileged Logon
+        ↓
+Administrative Accounts
+        ↓
+Scheduled Task
+        ↓
+Malicious Executable
+        ↓
+Local Network Listener
+        ↓
+External C2 Communication
+        ↓
+Credential Access
+        ↓
+Firewall Modification
+        ↓
+Web Shell Activity
+        ↓
+DNS Manipulation
+```
+
+Each artifact was used to pivot into the next stage of the investigation.
+
+For example, identifying a suspicious scheduled task provided the execution path of a malicious file. That file could then be correlated with listening network sockets using `netstat`, while the associated PID could be traced back to the process responsible for the activity.
+
+Similarly, privileged logon events were correlated with the compromise timeline to determine when elevated access first appeared.
+
+---
+
+## Key Queries and Commands
+
+### System Identification
+
+```cmd
+systeminfo
+hostname
+whoami
+```
+
+### User Enumeration
+
+```cmd
+net user
+net user <username>
+```
+
+### Administrative Group Enumeration
+
+```cmd
+net localgroup Administrators
+```
+
+### Scheduled Task Enumeration
+
+```cmd
+schtasks /query /fo LIST /v
+```
+
+```cmd
+schtasks /query /tn "<task-name>" /fo LIST /v
+```
+
+### Process Enumeration
+
+```cmd
+tasklist
+```
+
+```powershell
+Get-CimInstance Win32_Process |
+Select-Object ProcessId, ParentProcessId, Name, CommandLine
+```
+
+### Network Investigation
+
+```cmd
+netstat -ano
+```
+
+```cmd
+netstat -ano | findstr LISTENING
+```
+
+```cmd
+tasklist /FI "PID eq <PID>"
+```
+
+### Security Event Investigation
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    Id=4624
+}
+```
+
+```powershell
+Get-WinEvent -FilterHashtable @{
+    LogName='Security'
+    Id=4672
+} | Select-Object TimeCreated, Id, Message
+```
+
+### Firewall Investigation
+
+```cmd
+netsh advfirewall firewall show rule name=all
+```
+
+```cmd
+netsh advfirewall firewall show rule name=all | findstr /I "Inbound"
+```
+
+### DNS Investigation
+
+```cmd
+ipconfig /all
+```
+
+```cmd
+type C:\Windows\System32\drivers\etc\hosts
+```
+
+---
+
+## Summary of Findings
+
+The investigation demonstrated how a previously compromised Windows workstation can be investigated using native Windows artifacts and system utilities.
+
+The analysis established evidence across multiple stages of the intrusion, including:
+
+- Identification of the affected Windows system
+- Reconstruction of user logon activity
+- Identification of additional administrative accounts
+- Discovery of a malicious scheduled task used for persistence
+- Identification of the executable launched by the scheduled task
+- Correlation of the malicious executable with a local listening service
+- Reconstruction of the compromise timeline using Windows Security events
+- Identification of credential-access activity
+- Identification of external command-and-control infrastructure
+- Discovery of a web-based shell used by the attacker
+- Identification of firewall modifications used to expose an additional service
+- Investigation of DNS-related manipulation and potential poisoning
+
+The key lesson from the investigation is that a compromised Windows host rarely contains only one obvious indicator. Persistence, process execution, authentication, network connections, firewall changes, and DNS artifacts can be correlated to reconstruct attacker activity even when the original compromise is no longer actively occurring.
+
+---
+
+## Skills Demonstrated
+
+- Windows host-based incident investigation
+- DFIR artifact identification and correlation
+- Windows Security Event Log analysis
+- Authentication and privileged-logon investigation
+- Local account and administrator-group enumeration
+- Scheduled-task persistence detection
+- Process and command-line investigation
+- PID and process-to-network correlation
+- Local network listener investigation
+- Command-and-control identification
+- Credential-access investigation
+- Web-shell identification
+- Windows Firewall rule analysis
+- DNS configuration and poisoning investigation
+- Timeline reconstruction from multiple Windows artifacts
+- Native Windows command-line and PowerShell investigation
+- Evidence-based incident reconstruction
+```
