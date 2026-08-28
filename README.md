@@ -1,1 +1,530 @@
-# Cybersecurity-Blue-Team-PortfolioA hands-on cybersecurity portfolio documenting practical training and investigations across \*\*SOC operations, Blue Team security, Network Traffic Analysis, Malware Analysis, IDS/IPS, Phishing Analysis, Digital Forensics, DFIR, and Threat Intelligence\*\*.This repository focuses on \*\*practical skill development and methodology documentation\*\* through security investigation labs and simulated incident scenarios.The goal is to demonstrate the ability to investigate security events, analyze evidence, correlate indicators across different data sources, and document findings using tools and techniques commonly used by SOC and Blue Team teams.\---\## 🎯 Portfolio ObjectiveThis repository was built as a practical training record to develop and document core \*\*Blue Team and SOC Analyst skills\*\*.The investigations cover different stages of the defensive security workflow, including:\* Security alert triage\* Network traffic analysis\* IDS/IPS investigation\* SIEM investigation\* Malware analysis\* Phishing analysis\* Windows endpoint investigation\* Digital forensics and DFIR\* Threat intelligence enrichment\* IOC identification and correlation\* Command-and-Control (C2) investigation\* Detection engineering\* Incident reconstructionRather than documenting only the final results of each challenge, the individual reports focus on \*\*how the investigation was performed\*\*, including the analysis methodology, queries, filters, forensic artifacts, and investigative pivots used to reach the findings.\---\## 🛡️ Skills \& Technologies\### Security Operations / SOC\* Alert Triage\* Incident Investigation\* Event Correlation\* IOC Analysis\* Threat Hunting\* Incident Reconstruction\* Network-Based Investigation\* Endpoint Investigation\* Security Monitoring\### Network Security\* Wireshark\* Brim\* PCAP Analysis\* HTTP Traffic Analysis\* DNS Analysis\* TCP/IP Analysis\* C2 Traffic Investigation\* Network Flow Analysis\* NetworkMiner\* Data Exfiltration Analysis\### SIEM \& Log Analysis\* Splunk\* Elastic Stack / ELK\* Kibana\* KQL\* SPL\* Windows Event Logs\* Sysmon\* Event ID Analysis\* Process Creation Analysis\* Network Connection Analysis\* DNS Query Analysis\### Malware Analysis\* Static Malware Analysis\* PE Analysis\* Hash Analysis\* IOC Extraction\* Payload Analysis\* Malware Family Identification\* Suspicious Process Analysis\* Command-and-Control Analysis\### Digital Forensics / DFIR\* Windows Forensics\* Memory Forensics\* Volatility\* Windows Event Log Analysis\* Sysmon Analysis\* Process Tree Reconstruction\* Persistence Analysis\* Privilege Escalation Investigation\* Lateral Movement Investigation\* Credential Dumping Analysis\### IDS / Detection Engineering\* Snort\* IDS Rule Development\* Rule Syntax Analysis\* Traffic-Based Detection\* Payload-Based Detection\* Signature Analysis\* Detection Validation\### Phishing Analysis\* Email Header Analysis\* Sender Authentication Analysis\* SPF\* DMARC\* Email Artifact Extraction\* Attachment Analysis\* Hash Investigation\* VirusTotal Enrichment\* Malicious File Identification\### Threat Intelligence\* IOC Enrichment\* IP Reputation Analysis\* Domain Investigation\* Hash Investigation\* VirusTotal\* Threat Actor / Malware Attribution\* Infrastructure Correlation\* MITRE ATT\&CK\* Pyramid of Pain\---\# 📂 Portfolio Structure\## 01 — Network Traffic AnalysisHands-on investigations focused on analyzing packet captures and network telemetry to identify malicious communication, C2 activity, compromised hosts, and data transfer behavior.\### Carnage\*\*Tools:\*\* Wireshark, Brim, VirusTotalFocus areas:\* IDS alert investigation\* C2 traffic analysis\* HTTP traffic investigation\* Threat intelligence enrichment\* Malicious infrastructure identification\* Multi-host incident scoping\* HTTP stream reconstruction\* Payload and file-drop analysis\[View Investigation →](./01-Network-Traffic-Analysis/Carnage/)\### Stolen Mount\*\*Focus:\*\* NFS traffic analysis and data exfiltration investigation.Skills practiced include:\* Network protocol analysis\* NFS traffic investigation\* File transfer analysis\* Data exfiltration identification\* PCAP-based incident reconstruction\[View Investigation →](./01-Network-Traffic-Analysis/Stolen-Mount/)\### Warzone 1\*\*Tools:\*\* Brim, Wireshark, VirusTotalFocus areas:\* IDS alert triage\* True-positive validation\* Threat intelligence pivoting\* HTTP traffic fingerprinting\* User-Agent analysis\* Multi-host investigation\* File-drop reconstruction\[View Investigation →](./01-Network-Traffic-Analysis/Warzone-1/)\### Warzone 2\*\*Tools:\*\* Brim, Wireshark, NetworkMiner, VirusTotalFocus areas:\* Multi-alert correlation\* Payload extraction\* Threat infrastructure mapping\* VirusTotal relationship analysis\* Identification of malicious infrastructure missed by the IDS\* Network-based incident scoping\[View Investigation →](./01-Network-Traffic-Analysis/Warzone-2/)\---\# 02 — Malware AnalysisInvestigations focused on identifying malicious binaries, extracting indicators, analyzing PE characteristics, and understanding malware behavior.\### Benign\*\*Focus:\*\* Static malware analysis and investigation of a suspicious Windows binary.Skills practiced include:\* Binary identification\* Hash analysis\* PE artifact analysis\* Embedded URL extraction\* IOC identification\* Library/import analysis\* Malware behavior investigation\[View Investigation →](./02-Malware-Analysis/Benign/)\### Shadow Trace\*\*Focus:\*\* PE analysis and IOC extraction.Skills practiced include:\* Windows executable analysis\* Binary architecture identification\* SHA-256 analysis\* Embedded URL extraction\* Domain identification\* Suspicious library analysis\* IOC extraction and validation\[View Investigation →](./02-Malware-Analysis/Shadow-Trace/)\---\# 03 — IDS / IPSDetection engineering exercises focused on understanding network signatures and developing Snort rules to identify malicious or suspicious traffic.\### Snort Challenge — Basics\*\*Tool:\*\* SnortSkills practiced include:\* Snort rule syntax\* TCP traffic detection\* HTTP traffic detection\* FTP traffic detection\* File signature detection\* Payload inspection\* Rule troubleshooting\* Syntax error correction\* Logical rule validation\* Exploitation traffic detection\* MS17-010 detection\* Log4j exploitation detection\[View Investigation →](./03-IDS-IPS/Snort-Challenge-Basics/)\---\# 04 — Phishing AnalysisEmail security investigations focused on identifying phishing indicators and validating the authenticity and origin of suspicious messages.\### The Greenholt Phish\*\*Focus:\*\* End-to-end phishing email analysis.Skills practiced include:\* Email artifact extraction\* Header analysis\* Sender identification\* Return-Path investigation\* Originating IP analysis\* SPF analysis\* DMARC analysis\* Attachment identification\* SHA-256 hash calculation\* VirusTotal investigation\* File type identification\[View Investigation →](./04-Phishing-Analysis/The-Greenholt-Phish/)\---\# 05 — Digital Forensics \& DFIRA collection of endpoint and incident-response investigations covering Windows artifacts, memory analysis, persistence, privilege escalation, credential theft, lateral movement, and full attack-chain reconstruction.\### Investigating WindowsFocus areas:\* Windows system investigation\* User activity analysis\* Windows Event Logs\* Account investigation\* Scheduled task analysis\* Persistence detection\* Privileged account identification\* Password dumping investigation\* C2 infrastructure identification\* DNS poisoning investigation\[View Investigation →](./05-Digital-Forensics-DFIR/Investigating-Windows/)\### Tempest\*\*Tools:\*\* Sysmon, Windows Event Logs, Wireshark, Brim, KibanaA full incident-response investigation covering an attack chain originating from a malicious document.Focus areas include:\* Malicious document investigation\* Process tree reconstruction\* Sysmon Event ID analysis\* PowerShell analysis\* Base64 payload investigation\* Exploit identification\* Stage 2 payload analysis\* C2 investigation\* Reverse SOCKS proxy analysis\* Credential discovery\* Privilege escalation\* Persistence\* Local account creation\* Administrative group modification\[View Investigation →](./05-Digital-Forensics-DFIR/Tempest/)\### Boogeyman SeriesA multi-stage DFIR investigation series covering phishing, endpoint compromise, memory forensics, C2 activity, privilege escalation, credential theft, lateral movement, Active Directory attacks, and ransomware activity.\#### Boogeyman 1Focus areas:\* Phishing investigation\* Malicious document analysis\* Endpoint forensics\* Memory and process analysis\* Stage 2 payload identification\* C2 investigation\* Persistence analysis\[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-1/)\#### Boogeyman 2\*\*Tools:\*\* Volatility, OlevbaFocus areas:\* Phishing email analysis\* Malicious Office document analysis\* VBA macro extraction\* Memory forensics\* Process tree analysis\* C2 identification\* Scheduled task persistence\* Credential and endpoint artifact investigation\[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-2/)\#### Boogeyman 3\*\*Tools:\*\* Elastic Stack / KibanaFocus areas:\* SIEM-based incident investigation\* Windows endpoint analysis\* Process execution analysis\* Persistence\* UAC bypass\* Credential dumping\* Lateral movement\* Remote share enumeration\* Credential reuse\* Active Directory investigation\* DCSync activity\* Ransomware staging\[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-3/)\---\# 06 — Threat IntelligenceInvestigations focused on enriching technical indicators and connecting individual artifacts to broader threat infrastructure and attacker behavior.\### Invite-Only\*\*Focus:\*\* IOC enrichment and threat intelligence investigation.Skills practiced include:\* SHA-256 investigation\* File identification\* Execution-chain analysis\* Parent process analysis\* Dropped-file identification\* Malware family attribution\* IP infrastructure analysis\* Threat report research\* Threat actor TTP identification\* Phishing infrastructure analysis\[View Investigation →](./06-Threat-Intelligence/Invite-Only/)\### Summit\*\*Focus:\*\* Detection engineering based on the Pyramid of Pain and MITRE ATT\&CK concepts.Skills practiced include:\* Indicator-based detection\* Detection engineering\* Adversary cost analysis\* IOC prioritization\* MITRE ATT\&CK mapping\* Sigma-based detection concepts\* Purple-team methodology\[View Investigation →](./06-Threat-Intelligence/Summit/)\---\# 🔎 Investigation MethodologyAcross the portfolio, investigations generally follow a structured defensive workflow:```textAlert / Suspicious Activity\&#x20;           ↓\&#x20;      Initial Triage\&#x20;           ↓\&#x20;   Identify Key Artifacts\&#x20;           ↓\&#x20;    Filter Relevant Data\&#x20;           ↓\&#x20;  Correlate Related Events\&#x20;           ↓\&#x20;Threat Intelligence Enrichment\&#x20;           ↓\&#x20;      Scope Expansion\&#x20;           ↓\&#x20;Reconstruct Attack Activity\&#x20;           ↓\&#x20;   Identify IOCs / TTPs\&#x20;           ↓\&#x20;  Document Findings```The exact methodology varies depending on the available evidence. Investigations may combine endpoint logs, network traffic, SIEM data, memory artifacts, email artifacts, and threat intelligence sources.\---\# 🧰 Primary Toolset| Category            | Tools                                                         || ------------------- | ------------------------------------------------------------- || Network Analysis    | Wireshark, Brim, NetworkMiner                                 || SIEM                | Splunk, Elastic Stack, Kibana                                 || Windows Analysis    | Event Viewer, Sysmon, Timeline Explorer, EvtxECmd, SysmonView || Memory Forensics    | Volatility                                                    || Malware Analysis    | PE analysis tools, Olevba, VirusTotal                         || IDS/IPS             | Snort                                                         || Threat Intelligence | VirusTotal and open-source intelligence                       || Query Languages     | SPL, KQL                                                      || Detection           | Snort Rules, Sigma concepts                                   |\---\# 📈 What This Portfolio DemonstratesThis portfolio is intended to demonstrate practical familiarity with the following Blue Team capabilities:\* Investigating security alerts from a SOC perspective\* Working with network and endpoint telemetry\* Performing structured PCAP investigations\* Using SIEM platforms to investigate suspicious activity\* Correlating process, network, DNS, and authentication events\* Investigating malware execution chains\* Identifying C2 infrastructure\* Extracting and validating IOCs\* Performing phishing email investigations\* Conducting Windows forensic investigations\* Performing memory analysis\* Investigating persistence mechanisms\* Identifying privilege escalation activity\* Tracking credential theft and lateral movement\* Writing and troubleshooting IDS detection rules\* Enriching indicators using threat intelligence\* Translating technical evidence into an incident narrative\---\# 🎓 Training ContextThe investigations documented in this repository were completed as part of hands-on cybersecurity training and simulated security scenarios.The purpose of the repository is \*\*skill development, practical repetition, and technical documentation\*\*.The individual reports intentionally focus on the investigation process rather than publishing challenge answers. Sensitive challenge-specific indicators, flags, credentials, and direct answers are omitted where appropriate.\---\# 📌 DisclaimerAll investigations documented here were performed in controlled training environments for educational and defensive security purposes.The repository does not contain real-world victim data, credentials, or unauthorized access information.The techniques documented are presented for \*\*defensive security analysis, detection engineering, incident response, and cybersecurity education\*\*.
+
+# Cybersecurity-Blue-Team-Portfolio
+
+A hands-on cybersecurity portfolio documenting practical training and investigations across **SOC operations, Blue Team security, Network Traffic Analysis, Malware Analysis, IDS/IPS, Phishing Analysis, Digital Forensics, DFIR, and Threat Intelligence**.
+
+This repository focuses on **practical skill development and methodology documentation** through security investigation labs and simulated incident scenarios.
+
+The goal is to demonstrate the ability to investigate security events, analyze evidence, correlate indicators across different data sources, and document findings using tools and techniques commonly used by SOC and Blue Team teams.
+
+---
+
+## Portfolio Objective
+
+This repository was built as a practical training record to develop and document core **Blue Team and SOC Analyst skills**.
+
+The investigations cover different stages of the defensive security workflow, including:
+
+- Security alert triage
+- Network traffic analysis
+- IDS/IPS investigation
+- SIEM investigation
+- Malware analysis
+- Phishing analysis
+- Windows endpoint investigation
+- Digital forensics and DFIR
+- Threat intelligence enrichment
+- IOC identification and correlation
+- Command-and-Control (C2) investigation
+- Detection engineering
+- Incident reconstruction
+
+Rather than documenting only the final results of each challenge, the individual reports focus on **how the investigation was performed**, including the analysis methodology, queries, filters, forensic artifacts, and investigative pivots used to reach the findings.
+
+---
+
+## Skills & Technologies
+
+### Security Operations / SOC
+
+- Alert Triage
+- Incident Investigation
+- Event Correlation
+- IOC Analysis
+- Threat Hunting
+- Incident Reconstruction
+- Network-Based Investigation
+- Endpoint Investigation
+- Security Monitoring
+
+### Network Security
+
+- Wireshark
+- Brim
+- PCAP Analysis
+- HTTP Traffic Analysis
+- DNS Analysis
+- TCP/IP Analysis
+- C2 Traffic Investigation
+- Network Flow Analysis
+- NetworkMiner
+- Data Exfiltration Analysis
+
+### SIEM & Log Analysis
+
+- Splunk
+- Elastic Stack / ELK
+- Kibana
+- KQL
+- SPL
+- Windows Event Logs
+- Sysmon
+- Event ID Analysis
+- Process Creation Analysis
+- Network Connection Analysis
+- DNS Query Analysis
+
+### Malware Analysis
+
+- Static Malware Analysis
+- PE Analysis
+- Hash Analysis
+- IOC Extraction
+- Payload Analysis
+- Malware Family Identification
+- Suspicious Process Analysis
+- Command-and-Control Analysis
+
+### Digital Forensics / DFIR
+
+- Windows Forensics
+- Memory Forensics
+- Volatility
+- Windows Event Log Analysis
+- Sysmon Analysis
+- Process Tree Reconstruction
+- Persistence Analysis
+- Privilege Escalation Investigation
+- Lateral Movement Investigation
+- Credential Dumping Analysis
+
+### IDS / Detection Engineering
+
+- Snort
+- IDS Rule Development
+- Rule Syntax Analysis
+- Traffic-Based Detection
+- Payload-Based Detection
+- Signature Analysis
+- Detection Validation
+
+### Phishing Analysis
+
+- Email Header Analysis
+- Sender Authentication Analysis
+- SPF
+- DMARC
+- Email Artifact Extraction
+- Attachment Analysis
+- Hash Investigation
+- VirusTotal Enrichment
+- Malicious File Identification
+
+### Threat Intelligence
+
+- IOC Enrichment
+- IP Reputation Analysis
+- Domain Investigation
+- Hash Investigation
+- VirusTotal
+- Threat Actor / Malware Attribution
+- Infrastructure Correlation
+- MITRE ATT&CK
+- Pyramid of Pain
+
+---
+
+## Portfolio Structure
+
+### 01 — Network Traffic Analysis
+
+Hands-on investigations focused on analyzing packet captures and network telemetry to identify malicious communication, C2 activity, compromised hosts, and data transfer behavior.
+
+#### Carnage
+
+**Tools:** Wireshark, Brim, VirusTotal
+
+Focus areas:
+
+- IDS alert investigation
+- C2 traffic analysis
+- HTTP traffic investigation
+- Threat intelligence enrichment
+- Malicious infrastructure identification
+- Multi-host incident scoping
+- HTTP stream reconstruction
+- Payload and file-drop analysis
+
+[View Investigation →](./01-Network-Traffic-Analysis/Carnage/)
+
+#### Stolen Mount
+
+**Focus:** NFS traffic analysis and data exfiltration investigation.
+
+Skills practiced include:
+
+- Network protocol analysis
+- NFS traffic investigation
+- File transfer analysis
+- Data exfiltration identification
+- PCAP-based incident reconstruction
+
+[View Investigation →](./01-Network-Traffic-Analysis/Stolen-Mount/)
+
+#### Warzone 1
+
+**Tools:** Brim, Wireshark, VirusTotal
+
+Focus areas:
+
+- IDS alert triage
+- True-positive validation
+- Threat intelligence pivoting
+- HTTP traffic fingerprinting
+- User-Agent analysis
+- Multi-host investigation
+- File-drop reconstruction
+
+[View Investigation →](./01-Network-Traffic-Analysis/Warzone-1/)
+
+#### Warzone 2
+
+**Tools:** Brim, Wireshark, NetworkMiner, VirusTotal
+
+Focus areas:
+
+- Multi-alert correlation
+- Payload extraction
+- Threat infrastructure mapping
+- VirusTotal relationship analysis
+- Identification of malicious infrastructure missed by the IDS
+- Network-based incident scoping
+
+[View Investigation →](./01-Network-Traffic-Analysis/Warzone-2/)
+
+---
+
+### 02 — Malware Analysis
+
+Investigations focused on identifying malicious binaries, extracting indicators, analyzing PE characteristics, and understanding malware behavior.
+
+#### Benign
+
+**Focus:** Static malware analysis and investigation of a suspicious Windows binary.
+
+Skills practiced include:
+
+- Binary identification
+- Hash analysis
+- PE artifact analysis
+- Embedded URL extraction
+- IOC identification
+- Library/import analysis
+- Malware behavior investigation
+
+[View Investigation →](./02-Malware-Analysis/Benign/)
+
+#### Shadow Trace
+
+**Focus:** PE analysis and IOC extraction.
+
+Skills practiced include:
+
+- Windows executable analysis
+- Binary architecture identification
+- SHA-256 analysis
+- Embedded URL extraction
+- Domain identification
+- Suspicious library analysis
+- IOC extraction and validation
+
+[View Investigation →](./02-Malware-Analysis/Shadow-Trace/)
+
+---
+
+### 03 — IDS / IPS
+
+Detection engineering exercises focused on understanding network signatures and developing Snort rules to identify malicious or suspicious traffic.
+
+#### Snort Challenge — Basics
+
+**Tool:** Snort
+
+Skills practiced include:
+
+- Snort rule syntax
+- TCP traffic detection
+- HTTP traffic detection
+- FTP traffic detection
+- File signature detection
+- Payload inspection
+- Rule troubleshooting
+- Syntax error correction
+- Logical rule validation
+- Exploitation traffic detection
+- MS17-010 detection
+- Log4j exploitation detection
+
+[View Investigation →](./03-IDS-IPS/Snort-Challenge-Basics/)
+
+---
+
+### 04 — Phishing Analysis
+
+Email security investigations focused on identifying phishing indicators and validating the authenticity and origin of suspicious messages.
+
+#### The Greenholt Phish
+
+**Focus:** End-to-end phishing email analysis.
+
+Skills practiced include:
+
+- Email artifact extraction
+- Header analysis
+- Sender identification
+- Return-Path investigation
+- Originating IP analysis
+- SPF analysis
+- DMARC analysis
+- Attachment identification
+- SHA-256 hash calculation
+- VirusTotal investigation
+- File type identification
+
+[View Investigation →](./04-Phishing-Analysis/The-Greenholt-Phish/)
+
+---
+
+### 05 — Digital Forensics & DFIR
+
+A collection of endpoint and incident-response investigations covering Windows artifacts, memory analysis, persistence, privilege escalation, credential theft, lateral movement, and full attack-chain reconstruction.
+
+#### Investigating Windows
+
+Focus areas:
+
+- Windows system investigation
+- User activity analysis
+- Windows Event Logs
+- Account investigation
+- Scheduled task analysis
+- Persistence detection
+- Privileged account identification
+- Password dumping investigation
+- C2 infrastructure identification
+- DNS poisoning investigation
+
+[View Investigation →](./05-Digital-Forensics-DFIR/Investigating-Windows/)
+
+#### Tempest
+
+**Tools:** Sysmon, Windows Event Logs, Wireshark, Brim, Kibana
+
+A full incident-response investigation covering an attack chain originating from a malicious document.
+
+Focus areas include:
+
+- Malicious document investigation
+- Process tree reconstruction
+- Sysmon Event ID analysis
+- PowerShell analysis
+- Base64 payload investigation
+- Exploit identification
+- Stage 2 payload analysis
+- C2 investigation
+- Reverse SOCKS proxy analysis
+- Credential discovery
+- Privilege escalation
+- Persistence
+- Local account creation
+- Administrative group modification
+
+[View Investigation →](./05-Digital-Forensics-DFIR/Tempest/)
+
+#### Boogeyman Series
+
+A multi-stage DFIR investigation series covering phishing, endpoint compromise, memory forensics, C2 activity, privilege escalation, credential theft, lateral movement, Active Directory attacks, and ransomware activity.
+
+##### Boogeyman 1
+
+Focus areas:
+
+- Phishing investigation
+- Malicious document analysis
+- Endpoint forensics
+- Memory and process analysis
+- Stage 2 payload identification
+- C2 investigation
+- Persistence analysis
+
+[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-1/)
+
+##### Boogeyman 2
+
+**Tools:** Volatility, Olevba
+
+Focus areas:
+
+- Phishing email analysis
+- Malicious Office document analysis
+- VBA macro extraction
+- Memory forensics
+- Process tree analysis
+- C2 identification
+- Scheduled task persistence
+- Credential and endpoint artifact investigation
+
+[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-2/)
+
+##### Boogeyman 3
+
+**Tools:** Elastic Stack / Kibana
+
+Focus areas:
+
+- SIEM-based incident investigation
+- Windows endpoint analysis
+- Process execution analysis
+- Persistence
+- UAC bypass
+- Credential dumping
+- Lateral movement
+- Remote share enumeration
+- Credential reuse
+- Active Directory investigation
+- DCSync activity
+- Ransomware staging
+
+[View Investigation →](./05-Digital-Forensics-DFIR/Boogeyman-Series/Boogeyman-3/)
+
+---
+
+### 06 — Threat Intelligence
+
+Investigations focused on enriching technical indicators and connecting individual artifacts to broader threat infrastructure and attacker behavior.
+
+#### Invite-Only
+
+**Focus:** IOC enrichment and threat intelligence investigation.
+
+Skills practiced include:
+
+- SHA-256 investigation
+- File identification
+- Execution-chain analysis
+- Parent process analysis
+- Dropped-file identification
+- Malware family attribution
+- IP infrastructure analysis
+- Threat report research
+- Threat actor TTP identification
+- Phishing infrastructure analysis
+
+[View Investigation →](./06-Threat-Intelligence/Invite-Only/)
+
+#### Summit
+
+**Focus:** Detection engineering based on the Pyramid of Pain and MITRE ATT&CK concepts.
+
+Skills practiced include:
+
+- Indicator-based detection
+- Detection engineering
+- Adversary cost analysis
+- IOC prioritization
+- MITRE ATT&CK mapping
+- Sigma-based detection concepts
+- Purple-team methodology
+
+[View Investigation →](./06-Threat-Intelligence/Summit/)
+
+---
+
+## Investigation Methodology
+
+Across the portfolio, investigations generally follow a structured defensive workflow:
+
+```
+Alert / Suspicious Activity
+            ↓
+       Initial Triage
+            ↓
+    Identify Key Artifacts
+            ↓
+     Filter Relevant Data
+            ↓
+   Correlate Related Events
+            ↓
+Threat Intelligence Enrichment
+            ↓
+       Scope Expansion
+            ↓
+Reconstruct Attack Activity
+            ↓
+    Identify IOCs / TTPs
+            ↓
+   Document Findings
+```
+
+The exact methodology varies depending on the available evidence. Investigations may combine endpoint logs, network traffic, SIEM data, memory artifacts, email artifacts, and threat intelligence sources.
+
+---
+
+## Primary Toolset
+
+| Category            | Tools                                                         |
+| ------------------- | ------------------------------------------------------------- |
+| Network Analysis    | Wireshark, Brim, NetworkMiner                                 |
+| SIEM                | Splunk, Elastic Stack, Kibana                                 |
+| Windows Analysis    | Event Viewer, Sysmon, Timeline Explorer, EvtxECmd, SysmonView |
+| Memory Forensics    | Volatility                                                    |
+| Malware Analysis    | PE analysis tools, Olevba, VirusTotal                         |
+| IDS/IPS             | Snort                                                         |
+| Threat Intelligence | VirusTotal and open-source intelligence                       |
+| Query Languages     | SPL, KQL                                                      |
+| Detection           | Snort Rules, Sigma concepts                                   |
+
+---
+
+## What This Portfolio Demonstrates
+
+This portfolio is intended to demonstrate practical familiarity with the following Blue Team capabilities:
+
+- Investigating security alerts from a SOC perspective
+- Working with network and endpoint telemetry
+- Performing structured PCAP investigations
+- Using SIEM platforms to investigate suspicious activity
+- Correlating process, network, DNS, and authentication events
+- Investigating malware execution chains
+- Identifying C2 infrastructure
+- Extracting and validating IOCs
+- Performing phishing email investigations
+- Conducting Windows forensic investigations
+- Performing memory analysis
+- Investigating persistence mechanisms
+- Identifying privilege escalation activity
+- Tracking credential theft and lateral movement
+- Writing and troubleshooting IDS detection rules
+- Enriching indicators using threat intelligence
+- Translating technical evidence into an incident narrative
+
+---
+
+## Training Context
+
+The investigations documented in this repository were completed as part of hands-on cybersecurity training and simulated security scenarios.
+
+The purpose of the repository is **skill development, practical repetition, and technical documentation**.
+
+The individual reports intentionally focus on the investigation process rather than publishing challenge answers. Sensitive challenge-specific indicators, flags, credentials, and direct answers are omitted where appropriate.
+
+---
+
+## Disclaimer
+
+All investigations documented here were performed in controlled training environments for educational and defensive security purposes.
+
+The repository does not contain real-world victim data, credentials, or unauthorized access information.
+
+The techniques documented are presented for **defensive security analysis, detection engineering, incident response, and cybersecurity education**.
+```
